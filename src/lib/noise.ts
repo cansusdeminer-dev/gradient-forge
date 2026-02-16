@@ -50,10 +50,45 @@ export class NoiseGenerator {
     );
   }
 
+  simplex2D(x: number, y: number): number {
+    const F2 = 0.5 * (Math.sqrt(3) - 1);
+    const G2 = (3 - Math.sqrt(3)) / 6;
+    const s = (x + y) * F2;
+    const i = Math.floor(x + s);
+    const j = Math.floor(y + s);
+    const t = (i + j) * G2;
+    const x0 = x - (i - t), y0 = y - (j - t);
+    const i1 = x0 > y0 ? 1 : 0;
+    const j1 = x0 > y0 ? 0 : 1;
+    const x1 = x0 - i1 + G2, y1 = y0 - j1 + G2;
+    const x2 = x0 - 1 + 2 * G2, y2 = y0 - 1 + 2 * G2;
+    const ii = i & 255, jj = j & 255;
+    const p = this.perm;
+    let n0 = 0, n1 = 0, n2 = 0;
+    let t0 = 0.5 - x0 * x0 - y0 * y0;
+    if (t0 > 0) { t0 *= t0; n0 = t0 * t0 * this.grad2(p[ii + p[jj]], x0, y0); }
+    let t1 = 0.5 - x1 * x1 - y1 * y1;
+    if (t1 > 0) { t1 *= t1; n1 = t1 * t1 * this.grad2(p[ii + i1 + p[jj + j1]], x1, y1); }
+    let t2 = 0.5 - x2 * x2 - y2 * y2;
+    if (t2 > 0) { t2 *= t2; n2 = t2 * t2 * this.grad2(p[ii + 1 + p[jj + 1]], x2, y2); }
+    return 70 * (n0 + n1 + n2);
+  }
+
   fbm(x: number, y: number, octaves: number, lacunarity: number, persistence: number): number {
     let value = 0, amplitude = 1, frequency = 1, maxValue = 0;
     for (let i = 0; i < octaves; i++) {
       value += amplitude * this.perlin2D(x * frequency, y * frequency);
+      maxValue += amplitude;
+      amplitude *= persistence;
+      frequency *= lacunarity;
+    }
+    return value / maxValue;
+  }
+
+  simplexFbm(x: number, y: number, octaves: number, lacunarity: number, persistence: number): number {
+    let value = 0, amplitude = 1, frequency = 1, maxValue = 0;
+    for (let i = 0; i < octaves; i++) {
+      value += amplitude * this.simplex2D(x * frequency, y * frequency);
       maxValue += amplitude;
       amplitude *= persistence;
       frequency *= lacunarity;

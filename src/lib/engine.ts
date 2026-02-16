@@ -16,7 +16,7 @@ export function computeGraph(
   const results = new Map<string, ImageData>();
   if (nodes.length === 0) return results;
 
-  // Build input map: targetNodeId → { handleId → sourceNodeId.sourceHandleId }
+  // Build input map
   const inputMap = new Map<string, Map<string, { nodeId: string; handleId: string }>>();
   for (const edge of edges) {
     if (!inputMap.has(edge.target)) inputMap.set(edge.target, new Map());
@@ -37,12 +37,10 @@ export function computeGraph(
     inDegree.set(edge.target, (inDegree.get(edge.target) || 0) + 1);
     adj.get(edge.source)?.push(edge.target);
   }
-
   const queue: string[] = [];
   for (const [id, deg] of inDegree) {
     if (deg === 0) queue.push(id);
   }
-
   const sorted: string[] = [];
   while (queue.length > 0) {
     const id = queue.shift()!;
@@ -58,25 +56,18 @@ export function computeGraph(
   for (const nodeId of sorted) {
     const node = nodes.find(n => n.id === nodeId);
     if (!node) continue;
-
     const data = node.data as unknown as NodeData;
     const moduleDef = MODULES[data.moduleType];
     if (!moduleDef) continue;
 
-    // Resolve inputs
     const resolvedInputs: Record<string, ImageData | null> = {};
     for (const inputId of moduleDef.inputs) {
       const source = inputMap.get(nodeId)?.get(inputId);
-      if (source) {
-        resolvedInputs[inputId] = results.get(source.nodeId) || null;
-      } else {
-        resolvedInputs[inputId] = null;
-      }
+      resolvedInputs[inputId] = source ? (results.get(source.nodeId) || null) : null;
     }
 
     try {
-      const result = moduleDef.compute(width, height, data.params, resolvedInputs);
-      results.set(nodeId, result);
+      results.set(nodeId, moduleDef.compute(width, height, data.params, resolvedInputs));
     } catch (e) {
       console.warn(`Compute error for node ${nodeId}:`, e);
       results.set(nodeId, new ImageData(width, height));
@@ -87,5 +78,17 @@ export function computeGraph(
 }
 
 export function findOutputNode(nodes: Node[]): Node | undefined {
-  return nodes.find(n => (n.data as unknown as NodeData).moduleType === 'output');
+  return nodes.find(n => (n.data as unknown as { moduleType: string }).moduleType === 'output');
+}
+
+export function imageDataToDataURL(imageData: ImageData, size = 48): string {
+  const tmp = document.createElement('canvas');
+  tmp.width = imageData.width;
+  tmp.height = imageData.height;
+  tmp.getContext('2d')!.putImageData(imageData, 0, 0);
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  canvas.getContext('2d')!.drawImage(tmp, 0, 0, size, size);
+  return canvas.toDataURL();
 }
