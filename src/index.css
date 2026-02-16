@@ -2,95 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 240 27% 4%;
+    --foreground: 240 10% 88%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 24% 10%;
+    --card-foreground: 240 10% 88%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 24% 10%;
+    --popover-foreground: 240 10% 88%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 180 100% 50%;
+    --primary-foreground: 240 27% 4%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 300 100% 60%;
+    --secondary-foreground: 240 27% 4%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 15% 18%;
+    --muted-foreground: 240 10% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 100% 55%;
+    --accent-foreground: 240 27% 4%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 80% 55%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 240 15% 20%;
+    --input: 240 15% 20%;
+    --ring: 180 100% 50%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 240 24% 8%;
+    --sidebar-foreground: 240 10% 88%;
+    --sidebar-primary: 180 100% 50%;
+    --sidebar-primary-foreground: 240 27% 4%;
+    --sidebar-accent: 240 15% 15%;
+    --sidebar-accent-foreground: 240 10% 88%;
+    --sidebar-border: 240 15% 20%;
+    --sidebar-ring: 180 100% 50%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Synth-specific tokens */
+    --synth-node: 240 20% 14%;
+    --synth-node-header: 240 20% 18%;
+    --synth-cyan: 180 100% 50%;
+    --synth-magenta: 300 100% 60%;
+    --synth-gold: 45 100% 55%;
+    --synth-lime: 120 100% 45%;
+    --synth-glow-sm: 0 0 8px;
+    --synth-glow-md: 0 0 16px;
+    --synth-glow-lg: 0 0 30px;
   }
 }
 
@@ -100,6 +62,109 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ReactFlow overrides for synth theme */
+.react-flow__background {
+  background-color: hsl(240 27% 4%) !important;
+}
+
+.react-flow__edge-path {
+  stroke: hsl(180 100% 50%) !important;
+  stroke-width: 2 !important;
+  filter: drop-shadow(0 0 4px hsl(180 100% 50% / 0.4));
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: edge-flow 1s linear infinite;
+}
+
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+.react-flow__connection-line {
+  stroke: hsl(180 100% 50%) !important;
+  stroke-width: 2 !important;
+  stroke-dasharray: 5 5;
+}
+
+.react-flow__handle {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  border: 2px solid hsl(180 100% 50%) !important;
+  background: hsl(240 24% 10%) !important;
+  transition: all 0.15s ease;
+}
+
+.react-flow__handle:hover {
+  background: hsl(180 100% 50%) !important;
+  box-shadow: 0 0 8px hsl(180 100% 50% / 0.6);
+}
+
+.react-flow__handle-right {
+  right: -5px !important;
+}
+
+.react-flow__handle-left {
+  left: -5px !important;
+}
+
+.react-flow__controls {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.react-flow__controls-button {
+  background: hsl(240 24% 10%) !important;
+  border: 1px solid hsl(240 15% 20%) !important;
+  color: hsl(240 10% 88%) !important;
+  border-radius: 6px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.react-flow__controls-button:hover {
+  background: hsl(240 15% 18%) !important;
+}
+
+.react-flow__controls-button svg {
+  fill: hsl(240 10% 88%) !important;
+}
+
+.react-flow__minimap {
+  background: hsl(240 24% 8%) !important;
+  border: 1px solid hsl(240 15% 20%) !important;
+  border-radius: 8px !important;
+}
+
+/* Glow utility classes */
+@layer utilities {
+  .glow-cyan {
+    box-shadow: 0 0 12px hsl(180 100% 50% / 0.3), 0 0 4px hsl(180 100% 50% / 0.2);
+  }
+
+  .glow-magenta {
+    box-shadow: 0 0 12px hsl(300 100% 60% / 0.3), 0 0 4px hsl(300 100% 60% / 0.2);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 12px hsl(45 100% 55% / 0.3), 0 0 4px hsl(45 100% 55% / 0.2);
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 10px hsl(180 100% 50% / 0.5);
+  }
+
+  .text-glow-magenta {
+    text-shadow: 0 0 10px hsl(300 100% 60% / 0.5);
   }
 }
