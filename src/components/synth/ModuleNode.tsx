@@ -15,6 +15,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   generator: 'hsl(180 100% 50%)',
   modifier: 'hsl(300 100% 60%)',
   fx: 'hsl(45 100% 55%)',
+  physics: 'hsl(160 100% 45%)',
   utility: 'hsl(120 100% 45%)',
 };
 
@@ -22,6 +23,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   generator: 'GEN',
   modifier: 'MOD',
   fx: 'FX',
+  physics: 'PHYS',
   utility: 'UTIL',
 };
 
