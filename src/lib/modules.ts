@@ -1,4 +1,6 @@
 import { NoiseGenerator, grayScott } from './noise';
+import type { Resource } from './types';
+import { GEOMETRY_MODULES } from './geometryModules';
 
 // === TYPES ===
 export interface ParamDef {
@@ -13,7 +15,7 @@ export interface ParamDef {
 export interface ModuleDef {
   id: string;
   name: string;
-  category: 'generator' | 'modifier' | 'fx' | 'utility' | 'physics';
+  category: 'generator' | 'modifier' | 'fx' | 'utility' | 'physics' | 'geometry' | 'material';
   params: ParamDef[];
   inputs: string[];
   outputs: string[];
@@ -24,6 +26,12 @@ export interface ModuleDef {
     params: Record<string, number>,
     inputs: Record<string, ImageData | null>
   ) => ImageData;
+  computeResource?: (
+    w: number, h: number,
+    params: Record<string, number>,
+    inputs: Record<string, Resource | null>
+  ) => Resource;
+  resourceType?: string;
 }
 
 // === HELPERS ===
@@ -2031,10 +2039,15 @@ export const MODULES: Record<string, ModuleDef> = {
   },
 };
 
+// Merge geometry & material modules
+Object.assign(MODULES, GEOMETRY_MODULES);
+
 export const MODULE_CATEGORIES = {
   generator: Object.values(MODULES).filter(m => m.category === 'generator'),
   modifier: Object.values(MODULES).filter(m => m.category === 'modifier'),
   fx: Object.values(MODULES).filter(m => m.category === 'fx'),
+  geometry: Object.values(MODULES).filter(m => m.category === 'geometry'),
+  material: Object.values(MODULES).filter(m => m.category === 'material'),
   physics: Object.values(MODULES).filter(m => m.category === 'physics'),
   utility: Object.values(MODULES).filter(m => m.category === 'utility'),
 };

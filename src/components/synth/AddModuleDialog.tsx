@@ -23,6 +23,8 @@ const CATEGORY_META: Record<string, { label: string; color: string; icon: string
   generator: { label: 'Generators', color: 'hsl(180 100% 50%)', icon: '⚡' },
   modifier: { label: 'Modifiers', color: 'hsl(300 100% 60%)', icon: '⟲' },
   fx: { label: 'Effects', color: 'hsl(45 100% 55%)', icon: '✦' },
+  geometry: { label: 'Geometry / SDF', color: 'hsl(200 100% 50%)', icon: '🔷' },
+  material: { label: 'Materials', color: 'hsl(30 100% 50%)', icon: '🎨' },
   physics: { label: 'Physics / Simulation', color: 'hsl(160 100% 45%)', icon: '🧬' },
   utility: { label: 'Utilities', color: 'hsl(120 100% 45%)', icon: '◎' },
 };
