@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Resource, MeshResource, MaterialResource } from '@/lib/types';
+import { surfaceNets } from '@/lib/meshOps';
 
 function MeshObject({ mesh, material }: { mesh: MeshResource; material?: MaterialResource | null }) {
   const geometry = useMemo(() => {
@@ -53,8 +54,14 @@ interface Viewport3DProps {
 }
 
 const Viewport3D: React.FC<Viewport3DProps> = ({ resource }) => {
-  const mesh = resource.type === 'mesh' ? resource :
-    resource.type === 'scene3d' ? resource.mesh : null;
+  const mesh = useMemo(() => {
+    if (resource.type === 'mesh') return resource;
+    if (resource.type === 'scene3d') return resource.mesh;
+    if (resource.type === 'sdf3d') {
+      return surfaceNets(resource.evaluate, resource.bounds, 64);
+    }
+    return null;
+  }, [resource]);
   const material = resource.type === 'scene3d' ? resource.material : null;
 
   return (
