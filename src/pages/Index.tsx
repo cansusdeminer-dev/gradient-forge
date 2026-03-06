@@ -268,8 +268,18 @@ function SynthApp() {
           </div>
 
           {/* Preview */}
-          <div className="w-[320px] shrink-0">
-            <PreviewPanel output={output} resolution={resolution} onResolutionChange={setResolution} />
+          <div className="w-[320px] shrink-0 flex flex-col">
+            {output && (output.type === 'scene3d' || output.type === 'mesh' || output.type === 'sdf3d') ? (
+              <div className="flex-1">
+                <Viewport3D resource={output} />
+              </div>
+            ) : (
+              <PreviewPanel
+                output={output && output.type === 'field2d' ? output.data : null}
+                resolution={resolution}
+                onResolutionChange={setResolution}
+              />
+            )}
           </div>
         </div>
 
