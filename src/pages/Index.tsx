@@ -190,8 +190,20 @@ function SynthApp() {
                   Presets
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-card border-border min-w-[200px]">
-                {PRESETS.map(preset => (
+              <DropdownMenuContent className="bg-card border-border min-w-[220px] max-h-[400px] overflow-y-auto">
+                <div className="px-2 py-1 text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">2D Textures</div>
+                {PRESETS.filter(p => p.category === '2d').map(preset => (
+                  <DropdownMenuItem
+                    key={preset.id}
+                    onClick={() => loadPreset(preset)}
+                    className="text-xs cursor-pointer flex flex-col items-start gap-0.5 py-2"
+                  >
+                    <span className="font-semibold">{preset.name}</span>
+                    <span className="text-[9px] text-muted-foreground">{preset.description}</span>
+                  </DropdownMenuItem>
+                ))}
+                <div className="px-2 py-1 mt-1 text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest border-t border-border/30">3D Geometry</div>
+                {PRESETS.filter(p => p.category === '3d').map(preset => (
                   <DropdownMenuItem
                     key={preset.id}
                     onClick={() => loadPreset(preset)}

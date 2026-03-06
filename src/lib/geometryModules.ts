@@ -5,6 +5,21 @@ import type { Resource, SDF3DResource, MeshResource } from './types';
 import * as SDF from './sdf';
 import { extractMesh, heightmapToMesh } from './meshOps';
 
+// ──── HSL Helper ────
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  if (s === 0) return [l, l, l];
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1; if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return [hue2rgb(p, q, h + 1 / 3), hue2rgb(p, q, h), hue2rgb(p, q, h - 1 / 3)];
+}
+
 // ──── SDF Preview Helper ────
 function sdfPreview(w: number, h: number, evaluate: (x: number, y: number, z: number) => number, bounds: number[]): ImageData {
   const img = new ImageData(w, h);
@@ -415,6 +430,285 @@ export const GEOMETRY_MODULES: Record<string, ModuleDef> = {
       if (!src || src.type !== 'sdf3d') return { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
       const eh: SDF.Vec3 = [p.ex ?? 0.2, p.ey ?? 0, p.ez ?? 0];
       return { type: 'sdf3d', evaluate: (x, y, z) => { const ep = SDF.opElongate([x, y, z], eh); return src.evaluate(ep[0], ep[1], ep[2]); }, bounds: BOUNDS };
+    },
+  },
+
+  // ══════════════════════════════════════════════════
+  //  ADDITIONAL SDF PRIMITIVES
+  // ══════════════════════════════════════════════════
+
+  sdfPyramid: {
+    id: 'sdfPyramid', name: 'SDF Pyramid', category: 'geometry', icon: '△', color: GEO_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [{ id: 'height', label: 'Height', min: 0.1, max: 3, default: 1, step: 0.01 }],
+    resourceType: 'sdf3d',
+    compute: (w, h, p) => sdfPreview(w, h, (x, y, z) => SDF.sdPyramid([x, y, z], p.height ?? 1), BOUNDS),
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'sdf3d',
+      evaluate: (x, y, z) => SDF.sdPyramid([x, y, z], p.height ?? 1),
+      bounds: BOUNDS,
+    }),
+  },
+
+  sdfTorusKnot: {
+    id: 'sdfTorusKnot', name: 'SDF Torus Knot', category: 'geometry', icon: '∞', color: GEO_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'major', label: 'Major', min: 0.2, max: 1.5, default: 0.6, step: 0.01 },
+      { id: 'minor', label: 'Minor', min: 0.05, max: 0.5, default: 0.2, step: 0.01 },
+      { id: 'p', label: 'P', min: 1, max: 5, default: 2, step: 1 },
+      { id: 'q', label: 'Q', min: 1, max: 7, default: 3, step: 1 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h, p) => sdfPreview(w, h, (x, y, z) => SDF.sdTorusKnot([x, y, z], p.major ?? 0.6, p.minor ?? 0.2, Math.round(p.p ?? 2), Math.round(p.q ?? 3)), BOUNDS),
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'sdf3d',
+      evaluate: (x, y, z) => SDF.sdTorusKnot([x, y, z], p.major ?? 0.6, p.minor ?? 0.2, Math.round(p.p ?? 2), Math.round(p.q ?? 3)),
+      bounds: BOUNDS,
+    }),
+  },
+
+  sdfGyroid: {
+    id: 'sdfGyroid', name: 'SDF Gyroid', category: 'geometry', icon: '⧖', color: GEO_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'scale', label: 'Scale', min: 1, max: 20, default: 5, step: 0.1 },
+      { id: 'thickness', label: 'Thick', min: 0.01, max: 1, default: 0.3, step: 0.01 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h, p) => sdfPreview(w, h, (x, y, z) => SDF.sdGyroid([x, y, z], p.scale ?? 5, p.thickness ?? 0.3), BOUNDS),
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'sdf3d',
+      evaluate: (x, y, z) => SDF.sdGyroid([x, y, z], p.scale ?? 5, p.thickness ?? 0.3),
+      bounds: [-1.5, -1.5, -1.5, 1.5, 1.5, 1.5],
+    }),
+  },
+
+  sdfSchwarzP: {
+    id: 'sdfSchwarzP', name: 'SDF Schwarz P', category: 'geometry', icon: '⬣', color: GEO_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'scale', label: 'Scale', min: 1, max: 20, default: 4, step: 0.1 },
+      { id: 'thickness', label: 'Thick', min: 0.01, max: 1.5, default: 0.5, step: 0.01 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h, p) => sdfPreview(w, h, (x, y, z) => SDF.sdSchwarzP([x, y, z], p.scale ?? 4, p.thickness ?? 0.5), BOUNDS),
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'sdf3d',
+      evaluate: (x, y, z) => SDF.sdSchwarzP([x, y, z], p.scale ?? 4, p.thickness ?? 0.5),
+      bounds: [-1.5, -1.5, -1.5, 1.5, 1.5, 1.5],
+    }),
+  },
+
+  sdfMenger: {
+    id: 'sdfMenger', name: 'SDF Menger Sponge', category: 'geometry', icon: '⊟', color: GEO_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'iterations', label: 'Iter', min: 1, max: 4, default: 3, step: 1 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h, p) => sdfPreview(w, h, (x, y, z) => SDF.sdMengerSponge([x, y, z], Math.round(p.iterations ?? 3)), BOUNDS),
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'sdf3d',
+      evaluate: (x, y, z) => SDF.sdMengerSponge([x, y, z], Math.round(p.iterations ?? 3)),
+      bounds: [-1.5, -1.5, -1.5, 1.5, 1.5, 1.5],
+    }),
+  },
+
+  sdfRoundCone: {
+    id: 'sdfRoundCone', name: 'SDF Round Cone', category: 'geometry', icon: '▽', color: GEO_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'r1', label: 'R1', min: 0.05, max: 1, default: 0.4, step: 0.01 },
+      { id: 'r2', label: 'R2', min: 0.02, max: 0.5, default: 0.15, step: 0.01 },
+      { id: 'height', label: 'Height', min: 0.1, max: 2, default: 0.8, step: 0.01 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h, p) => sdfPreview(w, h, (x, y, z) => SDF.sdRoundCone([x, y, z], p.r1 ?? 0.4, p.r2 ?? 0.15, p.height ?? 0.8), BOUNDS),
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'sdf3d',
+      evaluate: (x, y, z) => SDF.sdRoundCone([x, y, z], p.r1 ?? 0.4, p.r2 ?? 0.15, p.height ?? 0.8),
+      bounds: BOUNDS,
+    }),
+  },
+
+  // ══════════════════════════════════════════════════
+  //  ADVANCED SDF OPERATIONS
+  // ══════════════════════════════════════════════════
+
+  sdfSmoothIntersect: {
+    id: 'sdfSmoothIntersect', name: 'SDF Smooth Intersect', category: 'geometry', icon: '⊓', color: GEO_COLOR,
+    inputs: ['a', 'b'], outputs: ['out'],
+    params: [{ id: 'smoothness', label: 'Smooth', min: 0, max: 1, default: 0.2, step: 0.01 }],
+    resourceType: 'sdf3d',
+    compute: (w, h) => new ImageData(w, h),
+    computeResource: (_w, _h, p, inputs): Resource => {
+      const a = inputs.a as SDF3DResource | null;
+      const b = inputs.b as SDF3DResource | null;
+      if (!a || a.type !== 'sdf3d' || !b || b.type !== 'sdf3d') return { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
+      const k = p.smoothness ?? 0.2;
+      return { type: 'sdf3d', evaluate: (x, y, z) => SDF.opSmoothIntersect(a.evaluate(x, y, z), b.evaluate(x, y, z), k), bounds: BOUNDS };
+    },
+  },
+
+  sdfDisplace: {
+    id: 'sdfDisplace', name: 'SDF Noise Displace', category: 'geometry', icon: '≋', color: GEO_COLOR,
+    inputs: ['in'], outputs: ['out'],
+    params: [
+      { id: 'strength', label: 'Strength', min: 0, max: 1, default: 0.15, step: 0.01 },
+      { id: 'frequency', label: 'Freq', min: 1, max: 20, default: 5, step: 0.1 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h) => new ImageData(w, h),
+    computeResource: (_w, _h, p, inputs): Resource => {
+      const src = inputs.in as SDF3DResource | null;
+      if (!src || src.type !== 'sdf3d') return { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
+      const str = p.strength ?? 0.15, freq = p.frequency ?? 5;
+      return {
+        type: 'sdf3d',
+        evaluate: (x, y, z) => {
+          const disp = Math.sin(x * freq) * Math.sin(y * freq) * Math.sin(z * freq) * str;
+          return src.evaluate(x, y, z) + disp;
+        },
+        bounds: BOUNDS,
+      };
+    },
+  },
+
+  sdfMorph: {
+    id: 'sdfMorph', name: 'SDF Morph', category: 'geometry', icon: '⇋', color: GEO_COLOR,
+    inputs: ['a', 'b'], outputs: ['out'],
+    params: [{ id: 'mix', label: 'Mix', min: 0, max: 1, default: 0.5, step: 0.01 }],
+    resourceType: 'sdf3d',
+    compute: (w, h) => new ImageData(w, h),
+    computeResource: (_w, _h, p, inputs): Resource => {
+      const a = inputs.a as SDF3DResource | null;
+      const b = inputs.b as SDF3DResource | null;
+      if (!a || a.type !== 'sdf3d') return b || { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
+      if (!b || b.type !== 'sdf3d') return a;
+      const t = p.mix ?? 0.5;
+      return { type: 'sdf3d', evaluate: (x, y, z) => a.evaluate(x, y, z) * (1 - t) + b.evaluate(x, y, z) * t, bounds: BOUNDS };
+    },
+  },
+
+  sdfRotate: {
+    id: 'sdfRotate', name: 'SDF Rotate', category: 'geometry', icon: '↺', color: GEO_COLOR,
+    inputs: ['in'], outputs: ['out'],
+    params: [
+      { id: 'rx', label: 'RX', min: -180, max: 180, default: 0, step: 1 },
+      { id: 'ry', label: 'RY', min: -180, max: 180, default: 0, step: 1 },
+      { id: 'rz', label: 'RZ', min: -180, max: 180, default: 0, step: 1 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h) => new ImageData(w, h),
+    computeResource: (_w, _h, p, inputs): Resource => {
+      const src = inputs.in as SDF3DResource | null;
+      if (!src || src.type !== 'sdf3d') return { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
+      const ax = (p.rx ?? 0) * Math.PI / 180, ay = (p.ry ?? 0) * Math.PI / 180, az = (p.rz ?? 0) * Math.PI / 180;
+      const cx = Math.cos(ax), sx = Math.sin(ax), cy = Math.cos(ay), sy = Math.sin(ay), cz = Math.cos(az), sz = Math.sin(az);
+      return {
+        type: 'sdf3d',
+        evaluate: (x, y, z) => {
+          // Rotate point inversely
+          let px = x, py = y, pz = z;
+          // RZ
+          let t = px; px = px * cz + py * sz; py = -t * sz + py * cz;
+          // RY
+          t = px; px = px * cy - pz * sy; pz = t * sy + pz * cy;
+          // RX
+          t = py; py = py * cx + pz * sx; pz = -t * sx + pz * cx;
+          return src.evaluate(px, py, pz);
+        },
+        bounds: BOUNDS,
+      };
+    },
+  },
+
+  sdfTranslate: {
+    id: 'sdfTranslate', name: 'SDF Translate', category: 'geometry', icon: '→', color: GEO_COLOR,
+    inputs: ['in'], outputs: ['out'],
+    params: [
+      { id: 'tx', label: 'TX', min: -3, max: 3, default: 0, step: 0.01 },
+      { id: 'ty', label: 'TY', min: -3, max: 3, default: 0, step: 0.01 },
+      { id: 'tz', label: 'TZ', min: -3, max: 3, default: 0, step: 0.01 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h) => new ImageData(w, h),
+    computeResource: (_w, _h, p, inputs): Resource => {
+      const src = inputs.in as SDF3DResource | null;
+      if (!src || src.type !== 'sdf3d') return { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
+      return { type: 'sdf3d', evaluate: (x, y, z) => src.evaluate(x - (p.tx ?? 0), y - (p.ty ?? 0), z - (p.tz ?? 0)), bounds: BOUNDS };
+    },
+  },
+
+  sdfRepeatLimited: {
+    id: 'sdfRepeatLimited', name: 'SDF Repeat Limited', category: 'geometry', icon: '⊡', color: GEO_COLOR,
+    inputs: ['in'], outputs: ['out'],
+    params: [
+      { id: 'period', label: 'Period', min: 0.5, max: 5, default: 1.5, step: 0.1 },
+      { id: 'countX', label: 'NX', min: 0, max: 5, default: 2, step: 1 },
+      { id: 'countY', label: 'NY', min: 0, max: 5, default: 0, step: 1 },
+      { id: 'countZ', label: 'NZ', min: 0, max: 5, default: 2, step: 1 },
+    ],
+    resourceType: 'sdf3d',
+    compute: (w, h) => new ImageData(w, h),
+    computeResource: (_w, _h, p, inputs): Resource => {
+      const src = inputs.in as SDF3DResource | null;
+      if (!src || src.type !== 'sdf3d') return { type: 'sdf3d', evaluate: () => 999, bounds: BOUNDS };
+      const period = p.period ?? 1.5;
+      const limit: SDF.Vec3 = [p.countX ?? 2, p.countY ?? 0, p.countZ ?? 2];
+      return { type: 'sdf3d', evaluate: (x, y, z) => { const rp = SDF.opRepeatLimited([x, y, z], period, limit); return src.evaluate(rp[0], rp[1], rp[2]); }, bounds: [-6, -6, -6, 6, 6, 6] };
+    },
+  },
+
+  // ══════════════════════════════════════════════════
+  //  ADDITIONAL MATERIALS
+  // ══════════════════════════════════════════════════
+
+  glassMaterial: {
+    id: 'glassMaterial', name: 'Glass Material', category: 'material', icon: '💎', color: MAT_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'r', label: 'R', min: 0, max: 255, default: 200, step: 1 },
+      { id: 'g', label: 'G', min: 0, max: 255, default: 220, step: 1 },
+      { id: 'b', label: 'B', min: 0, max: 255, default: 255, step: 1 },
+      { id: 'roughness', label: 'Rough', min: 0, max: 0.3, default: 0.05, step: 0.01 },
+    ],
+    resourceType: 'material',
+    compute: (w, h, p) => {
+      const img = new ImageData(w, h);
+      const d = img.data;
+      for (let i = 0; i < d.length; i += 4) { d[i] = p.r ?? 200; d[i + 1] = p.g ?? 220; d[i + 2] = p.b ?? 255; d[i + 3] = 255; }
+      return img;
+    },
+    computeResource: (_w, _h, p): Resource => ({
+      type: 'material',
+      color: [p.r ?? 200, p.g ?? 220, p.b ?? 255],
+      roughness: p.roughness ?? 0.05,
+      metalness: 0.1,
+    }),
+  },
+
+  gemMaterial: {
+    id: 'gemMaterial', name: 'Gem Material', category: 'material', icon: '♦', color: MAT_COLOR,
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'hue', label: 'Hue', min: 0, max: 360, default: 240, step: 1 },
+      { id: 'saturation', label: 'Sat', min: 0.5, max: 1, default: 0.9, step: 0.01 },
+    ],
+    resourceType: 'material',
+    compute: (w, h, p) => {
+      const hue = (p.hue ?? 240) / 360;
+      const [r, g, b] = hslToRgb(hue, p.saturation ?? 0.9, 0.5);
+      const img = new ImageData(w, h);
+      const d = img.data;
+      for (let i = 0; i < d.length; i += 4) { d[i] = r * 255; d[i + 1] = g * 255; d[i + 2] = b * 255; d[i + 3] = 255; }
+      return img;
+    },
+    computeResource: (_w, _h, p): Resource => {
+      const hue = (p.hue ?? 240) / 360;
+      const [r, g, b] = hslToRgb(hue, p.saturation ?? 0.9, 0.5);
+      return { type: 'material', color: [r * 255, g * 255, b * 255], roughness: 0.05, metalness: 0.3 };
     },
   },
 
