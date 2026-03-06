@@ -19,7 +19,9 @@ import ModuleNode from '@/components/synth/ModuleNode';
 import PreviewPanel from '@/components/synth/PreviewPanel';
 import AddModuleDialog from '@/components/synth/AddModuleDialog';
 import { MODULES } from '@/lib/modules';
-import { computeGraph, findOutputNode, imageDataToDataURL } from '@/lib/engine';
+import { computeGraph, findOutputNode, imageDataToDataURL, sdfToPreviewDataURL } from '@/lib/engine';
+import type { Resource } from '@/lib/types';
+import Viewport3D from '@/components/synth/Viewport3D';
 import { PRESETS } from '@/lib/presets';
 import { NodePreviewContext } from '@/lib/synthContext';
 import {
@@ -53,7 +55,7 @@ function SynthApp() {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultPreset.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultPreset.edges);
   const [resolution, setResolution] = useState(256);
-  const [output, setOutput] = useState<ImageData | null>(null);
+  const [output, setOutput] = useState<Resource | null>(null);
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const computeTimeoutRef = useRef<number>();
@@ -71,8 +73,12 @@ function SynthApp() {
 
         // Generate per-node previews
         const newPreviews = new Map<string, string>();
-        for (const [nodeId, imageData] of results) {
-          newPreviews.set(nodeId, imageDataToDataURL(imageData, 56));
+        for (const [nodeId, resource] of results) {
+          if (resource.type === 'field2d') {
+            newPreviews.set(nodeId, imageDataToDataURL(resource.data, 56));
+          } else if (resource.type === 'sdf3d') {
+            newPreviews.set(nodeId, sdfToPreviewDataURL(resource.evaluate, resource.bounds, 56));
+          }
         }
         setPreviews(newPreviews);
 
@@ -81,7 +87,6 @@ function SynthApp() {
         if (outputNode && results.has(outputNode.id)) {
           setOutput(results.get(outputNode.id)!);
         } else {
-          // Last sink node
           const sinks = nodes.filter(n => !edges.some(e => e.source === n.id));
           const lastSink = sinks[sinks.length - 1];
           if (lastSink && results.has(lastSink.id)) {
