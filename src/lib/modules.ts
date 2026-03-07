@@ -2037,6 +2037,430 @@ export const MODULES: Record<string, ModuleDef> = {
     params: [],
     compute: (_w, _h, _p, inputs) => inputs.in || new ImageData(_w, _h),
   },
+  // ══════════════════════════════════════════════════
+  //  NATURE & FX GENERATORS
+  // ══════════════════════════════════════════════════
+
+  oceanWaves: {
+    id: 'oceanWaves', name: 'Ocean Waves', category: 'generator', icon: '🌊', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'scale', label: 'Scale', min: 0.5, max: 20, default: 4, step: 0.1 },
+      { id: 'octaves', label: 'Oct', min: 1, max: 8, default: 5, step: 1 },
+      { id: 'choppy', label: 'Choppy', min: 1, max: 8, default: 4, step: 0.1 },
+      { id: 'height', label: 'Height', min: 0.1, max: 2, default: 0.6, step: 0.01 },
+      { id: 'time', label: 'Time', min: 0, max: 20, default: 1, step: 0.1 },
+      { id: 'dragMult', label: 'Drag', min: 0, max: 1, default: 0.38, step: 0.01 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(42);
+      const sc = p.scale ?? 4, oct = Math.round(p.octaves ?? 5);
+      const choppy = p.choppy ?? 4, seaH = p.height ?? 0.6, time = p.time ?? 1;
+      const drag = p.dragMult ?? 0.38;
+      return gen(w, h, (nx, ny) => {
+        let px = nx * sc, py = ny * sc;
+        let iter = 0, freq = 1, amp = seaH, weight = 1;
+        let sumVal = 0, sumWeight = 0;
+        for (let i = 0; i < oct; i++) {
+          const dir = [Math.sin(iter), Math.cos(iter)];
+          const x = (dir[0] * px + dir[1] * py) * freq + time * 2;
+          const wave = Math.exp(Math.sin(x) - 1);
+          const dx = wave * Math.cos(x);
+          px += dir[0] * (-dx) * weight * drag;
+          py += dir[1] * (-dx) * weight * drag;
+          sumVal += wave * weight;
+          sumWeight += weight;
+          weight = Math.max(weight * 0.8, 0);
+          freq *= 1.18;
+          iter += 1232.4;
+        }
+        return clamp01(sumVal / sumWeight);
+      });
+    },
+  },
+
+  cloudDensity: {
+    id: 'cloudDensity', name: 'Cloud Density', category: 'generator', icon: '☁', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 0.5, max: 15, default: 3, step: 0.1 },
+      { id: 'coverage', label: 'Cover', min: 0, max: 1, default: 0.5, step: 0.01 },
+      { id: 'density', label: 'Dense', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'octaves', label: 'Oct', min: 1, max: 8, default: 6, step: 1 },
+      { id: 'sharpness', label: 'Sharp', min: 0, max: 1, default: 0.3, step: 0.01 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const freq = p.frequency ?? 3, cov = p.coverage ?? 0.5, dens = p.density ?? 2;
+      const oct = Math.round(p.octaves ?? 6), sharp = p.sharpness ?? 0.3;
+      return gen(w, h, (nx, ny) => {
+        let val = 0, amp = 1, f = freq, mx = 0;
+        for (let i = 0; i < oct; i++) {
+          const noiseVal = n.simplex2D(nx * f + i * 7.3, ny * f + i * 3.7);
+          val += amp * noiseVal;
+          mx += amp;
+          amp *= 0.5;
+          f *= 2.1;
+        }
+        val = val / mx;
+        val = val - (1 - cov * 2);
+        val = Math.max(0, val) * dens;
+        if (sharp > 0) val = Math.pow(clamp01(val), 1 - sharp * 0.8);
+        return clamp01(val);
+      });
+    },
+  },
+
+  firePattern: {
+    id: 'firePattern', name: 'Fire Pattern', category: 'generator', icon: '🔥', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 1, max: 20, default: 5, step: 0.1 },
+      { id: 'intensity', label: 'Intens', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'rise', label: 'Rise', min: 0, max: 5, default: 2, step: 0.1 },
+      { id: 'turbulence', label: 'Turb', min: 0, max: 2, default: 1, step: 0.01 },
+      { id: 'time', label: 'Time', min: 0, max: 20, default: 0, step: 0.1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 7, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 7);
+      const freq = p.frequency ?? 5, intens = p.intensity ?? 2;
+      const rise = p.rise ?? 2, turb = p.turbulence ?? 1, time = p.time ?? 0;
+      return genRGB(w, h, (nx, ny) => {
+        const distFromCenter = Math.abs(nx - 0.5) * 2;
+        const heightFade = 1 - ny;
+        let d = 0;
+        let f = freq;
+        let a = 1;
+        for (let i = 0; i < 5; i++) {
+          const px = nx * f + Math.sin(ny * turb * 3 + i) * turb;
+          const py = ny * f - time * rise - i * 0.5;
+          d += a * n.simplex2D(px, py);
+          a *= 0.7;
+          f *= 1.93;
+        }
+        let density = clamp01((d * 0.5 + 0.5) * heightFade * intens - distFromCenter * 0.5);
+        density = Math.pow(density, 0.8);
+        const r = clamp01(density * 3) * 255;
+        const g = clamp01(density * 1.5 - 0.3) * 255;
+        const b = clamp01(density * 0.5 - 0.6) * 255;
+        return [r, g, b];
+      });
+    },
+  },
+
+  smokeTendrils: {
+    id: 'smokeTendrils', name: 'Smoke Tendrils', category: 'generator', icon: '💨', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 1, max: 15, default: 4, step: 0.1 },
+      { id: 'density', label: 'Dense', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'curl', label: 'Curl', min: 0, max: 3, default: 1.5, step: 0.01 },
+      { id: 'octaves', label: 'Oct', min: 1, max: 8, default: 5, step: 1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 33, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 33);
+      const freq = p.frequency ?? 4, dens = p.density ?? 2;
+      const curlStr = p.curl ?? 1.5, oct = Math.round(p.octaves ?? 5);
+      return gen(w, h, (nx, ny) => {
+        let px = nx * freq, py = ny * freq;
+        for (let i = 0; i < 3; i++) {
+          const [cx, cy] = n.curl2D(px * 0.5, py * 0.5);
+          px += cx * curlStr * 0.3;
+          py += cy * curlStr * 0.3;
+        }
+        let val = 0, amp = 1, f = 1, mx = 0;
+        for (let i = 0; i < oct; i++) {
+          val += amp * n.simplex2D(px * f, py * f);
+          mx += amp; amp *= 0.5; f *= 2;
+        }
+        val = val / mx;
+        val = clamp01((val + 0.5) * dens * (1 - ny * 0.5));
+        return val;
+      });
+    },
+  },
+
+  lensFlare: {
+    id: 'lensFlare', name: 'Lens Flare', category: 'generator', icon: '✦', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'sunX', label: 'Sun X', min: -1, max: 1, default: 0.3, step: 0.01 },
+      { id: 'sunY', label: 'Sun Y', min: -1, max: 1, default: 0.2, step: 0.01 },
+      { id: 'intensity', label: 'Intens', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'rings', label: 'Rings', min: 0, max: 1, default: 0.5, step: 0.01 },
+      { id: 'ghosts', label: 'Ghosts', min: 1, max: 10, default: 6, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const sx = p.sunX ?? 0.3, sy = p.sunY ?? 0.2;
+      const intens = p.intensity ?? 2, rings = p.rings ?? 0.5;
+      const ghosts = Math.round(p.ghosts ?? 6);
+      return genRGB(w, h, (nx, ny) => {
+        const ux = nx - 0.5, uy = (ny - 0.5);
+        // Sun glow
+        const dSun = Math.sqrt((ux - sx) ** 2 + (uy - sy) ** 2);
+        let brightness = Math.max(0.01 - Math.pow(dSun, 1.4) * 0.5, 0) * 50 * intens;
+        // Ring
+        const l = dSun + 0.15;
+        const ringVal = Math.max(0.001 - Math.pow(l - 0.3, 1 / 40) + Math.sin(l * 30) * rings, 0) * 3;
+        brightness += ringVal;
+        // Ghost flares
+        for (let i = 0; i < ghosts; i++) {
+          const dist = (i + 1) / ghosts * 0.8;
+          const gx = ux - sx * dist * 2;
+          const gy = uy - sy * dist * 2;
+          const gd = Math.sqrt(gx * gx + gy * gy);
+          brightness += Math.max(0.04 / Math.pow(gd * 10 + 0.1, 1), 0) / 20;
+        }
+        // color warmth
+        const r = brightness * 255 * 1.2;
+        const g = brightness * 255 * 0.9;
+        const b = brightness * 255 * 0.6;
+        return [clamp255(r), clamp255(g), clamp255(b)];
+      });
+    },
+  },
+
+  rippleWaves: {
+    id: 'rippleWaves', name: 'Ripple Waves', category: 'generator', icon: '◎', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 1, max: 50, default: 15, step: 0.5 },
+      { id: 'decay', label: 'Decay', min: 0, max: 5, default: 2, step: 0.1 },
+      { id: 'cx', label: 'CX', min: 0, max: 1, default: 0.5, step: 0.01 },
+      { id: 'cy', label: 'CY', min: 0, max: 1, default: 0.5, step: 0.01 },
+      { id: 'sources', label: 'Sources', min: 1, max: 5, default: 1, step: 1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const freq = p.frequency ?? 15, decay = p.decay ?? 2;
+      const sources = Math.round(p.sources ?? 1);
+      const positions: [number, number][] = [[p.cx ?? 0.5, p.cy ?? 0.5]];
+      const n = new NoiseGenerator(p.seed ?? 42);
+      for (let i = 1; i < sources; i++) {
+        const h2 = n.valueNoise2D(i * 17, i * 31);
+        positions.push([h2, n.valueNoise2D(i * 53, i * 7)]);
+      }
+      return gen(w, h, (nx, ny) => {
+        let val = 0;
+        for (const [cx, cy] of positions) {
+          const dx = nx - cx, dy = ny - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          val += Math.cos(dist * freq * Math.PI * 2) * Math.exp(-dist * decay);
+        }
+        return clamp01(val * 0.5 + 0.5);
+      });
+    },
+  },
+
+  aurora: {
+    id: 'aurora', name: 'Aurora', category: 'generator', icon: '🌌', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 1, max: 20, default: 5, step: 0.1 },
+      { id: 'bands', label: 'Bands', min: 1, max: 8, default: 3, step: 1 },
+      { id: 'waviness', label: 'Wave', min: 0, max: 3, default: 1.5, step: 0.1 },
+      { id: 'brightness', label: 'Bright', min: 0.5, max: 3, default: 1.5, step: 0.1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const freq = p.frequency ?? 5, bands = Math.round(p.bands ?? 3);
+      const wave = p.waviness ?? 1.5, bright = p.brightness ?? 1.5;
+      return genRGB(w, h, (nx, ny) => {
+        let totalR = 0, totalG = 0, totalB = 0;
+        for (let b = 0; b < bands; b++) {
+          const baseY = 0.3 + b * 0.15;
+          const warp = n.simplex2D(nx * freq + b * 10, b * 5) * wave * 0.15;
+          const bandDist = Math.abs(ny - baseY - warp);
+          const intensity = Math.exp(-bandDist * bandDist * 80) * bright;
+          const hue = 0.3 + b * 0.1 + nx * 0.1;
+          const [r, g, bb2] = hslToRgb(hue % 1, 0.8, 0.5);
+          totalR += r * intensity * 255;
+          totalG += g * intensity * 255;
+          totalB += bb2 * intensity * 255;
+        }
+        return [clamp255(totalR), clamp255(totalG), clamp255(totalB)];
+      });
+    },
+  },
+
+  lightning: {
+    id: 'lightning', name: 'Lightning', category: 'generator', icon: '⚡', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'branches', label: 'Branch', min: 1, max: 8, default: 3, step: 1 },
+      { id: 'detail', label: 'Detail', min: 2, max: 10, default: 6, step: 1 },
+      { id: 'glow', label: 'Glow', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const branches = Math.round(p.branches ?? 3);
+      const detail = Math.round(p.detail ?? 6), glow = p.glow ?? 2;
+      // Pre-generate bolt segments
+      const bolts: {x1:number,y1:number,x2:number,y2:number}[][] = [];
+      for (let b = 0; b < branches; b++) {
+        const segments: {x1:number,y1:number,x2:number,y2:number}[] = [];
+        let sx = 0.3 + b * 0.2, sy = 0;
+        for (let i = 0; i < detail * 3; i++) {
+          const ex = sx + (n.valueNoise2D(i * 17 + b * 100, 0) - 0.5) * 0.15;
+          const ey = sy + 1 / (detail * 3);
+          segments.push({x1: sx, y1: sy, x2: ex, y2: ey});
+          sx = ex; sy = ey;
+        }
+        bolts.push(segments);
+      }
+      return genRGB(w, h, (nx, ny) => {
+        let minDist = 999;
+        for (const segs of bolts) {
+          for (const s of segs) {
+            const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+            const len2 = dx * dx + dy * dy;
+            const t = len2 > 0 ? clamp01(((nx - s.x1) * dx + (ny - s.y1) * dy) / len2) : 0;
+            const px = s.x1 + t * dx, py = s.y1 + t * dy;
+            const d = Math.sqrt((nx - px) ** 2 + (ny - py) ** 2);
+            minDist = Math.min(minDist, d);
+          }
+        }
+        const intensity = Math.exp(-minDist * 40 / glow);
+        const core = Math.exp(-minDist * 200);
+        const r = clamp255((intensity * 0.7 + core) * 255);
+        const g = clamp255((intensity * 0.8 + core) * 255);
+        const b2 = clamp255((intensity + core) * 255);
+        return [r, g, b2];
+      });
+    },
+  },
+
+  nebula: {
+    id: 'nebula', name: 'Nebula', category: 'generator', icon: '✨', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 1, max: 15, default: 3, step: 0.1 },
+      { id: 'colorShift', label: 'Color', min: 0, max: 1, default: 0.5, step: 0.01 },
+      { id: 'density', label: 'Dense', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'stars', label: 'Stars', min: 0, max: 1, default: 0.5, step: 0.01 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const freq = p.frequency ?? 3, colShift = p.colorShift ?? 0.5;
+      const dens = p.density ?? 2, stars = p.stars ?? 0.5;
+      return genRGB(w, h, (nx, ny) => {
+        // Nebula clouds
+        let val = n.fbm(nx * freq, ny * freq, 6, 2.1, 0.5) * 0.5 + 0.5;
+        const val2 = n.fbm(nx * freq * 1.7 + 5, ny * freq * 1.7 + 5, 5, 2, 0.45) * 0.5 + 0.5;
+        val = Math.pow(val, 1.5) * dens;
+        const hue1 = colShift;
+        const hue2 = (colShift + 0.4) % 1;
+        const [r1, g1, b1] = hslToRgb(hue1, 0.9, 0.4);
+        const [r2, g2, b2] = hslToRgb(hue2, 0.8, 0.3);
+        let r = (r1 * val + r2 * val2 * 0.5) * 255;
+        let g = (g1 * val + g2 * val2 * 0.5) * 255;
+        let b = (b1 * val + b2 * val2 * 0.5) * 255;
+        // Stars
+        if (stars > 0) {
+          const starHash = Math.sin(Math.floor(nx * w) * 12.9898 + Math.floor(ny * h) * 78.233 + (p.seed ?? 42)) * 43758.5453;
+          const starVal = starHash - Math.floor(starHash);
+          if (starVal > 1 - stars * 0.002) {
+            const bright = (starVal - (1 - stars * 0.002)) / (stars * 0.002);
+            r += bright * 255; g += bright * 255; b += bright * 255;
+          }
+        }
+        return [clamp255(r), clamp255(g), clamp255(b)];
+      });
+    },
+  },
+
+  galaxySpiral: {
+    id: 'galaxySpiral', name: 'Galaxy Spiral', category: 'generator', icon: '🌀', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'arms', label: 'Arms', min: 1, max: 6, default: 2, step: 1 },
+      { id: 'tightness', label: 'Tight', min: 1, max: 10, default: 4, step: 0.1 },
+      { id: 'falloff', label: 'Falloff', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'brightness', label: 'Bright', min: 0.5, max: 5, default: 2, step: 0.1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const arms = Math.round(p.arms ?? 2), tight = p.tightness ?? 4;
+      const falloff = p.falloff ?? 2, bright = p.brightness ?? 2;
+      return genRGB(w, h, (nx, ny) => {
+        const dx = nx - 0.5, dy = ny - 0.5;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
+        const spiralAngle = (angle * arms / (Math.PI * 2) + dist * tight) % 1;
+        const armDist = Math.abs(spiralAngle - 0.5);
+        const armIntensity = Math.exp(-armDist * armDist * 60) * Math.exp(-dist * falloff);
+        const noise = n.fbm(nx * 15, ny * 15, 4, 2, 0.5) * 0.2;
+        const core = Math.exp(-dist * dist * 30) * 0.8;
+        const total = (armIntensity + noise * Math.exp(-dist * 3) + core) * bright;
+        const hue = 0.08 + dist * 0.3 + armIntensity * 0.1;
+        const [r, g, b] = hslToRgb(hue % 1, 0.7 - dist * 0.5, clamp01(total * 0.5));
+        // Stars
+        const starHash = Math.sin(Math.floor(nx * w) * 12.9898 + Math.floor(ny * h) * 78.233) * 43758.5453;
+        const sv = starHash - Math.floor(starHash);
+        let starAdd = 0;
+        if (sv > 0.998) starAdd = (sv - 0.998) * 500;
+        return [clamp255(r * 255 + starAdd * 200), clamp255(g * 255 + starAdd * 200), clamp255(b * 255 + starAdd * 255)];
+      });
+    },
+  },
+
+  icePattern: {
+    id: 'icePattern', name: 'Ice Crystals', category: 'generator', icon: '❄', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'scale', label: 'Scale', min: 1, max: 20, default: 6, step: 0.1 },
+      { id: 'branches', label: 'Branch', min: 3, max: 12, default: 6, step: 1 },
+      { id: 'detail', label: 'Detail', min: 1, max: 8, default: 4, step: 1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const sc = p.scale ?? 6, br = Math.round(p.branches ?? 6);
+      const det = Math.round(p.detail ?? 4);
+      return gen(w, h, (nx, ny) => {
+        const v = n.voronoi(nx * sc, ny * sc, 0.9);
+        const edge = clamp01(1 - (v.f2 - v.f1) * 4);
+        const angle = Math.atan2(ny * sc - Math.floor(ny * sc + 0.5) - 0.5, nx * sc - Math.floor(nx * sc + 0.5) - 0.5);
+        const crystal = Math.pow(Math.abs(Math.cos(angle * br / 2)), 0.5);
+        const noise = n.fbm(nx * sc * 3, ny * sc * 3, det, 2, 0.5) * 0.3 + 0.7;
+        return clamp01(edge * crystal * noise);
+      });
+    },
+  },
+
+  lavaLake: {
+    id: 'lavaLake', name: 'Lava Lake', category: 'generator', icon: '🌋', color: 'hsl(180 100% 50%)',
+    inputs: [], outputs: ['out'],
+    params: [
+      { id: 'frequency', label: 'Freq', min: 1, max: 15, default: 3, step: 0.1 },
+      { id: 'crackWidth', label: 'Cracks', min: 0.01, max: 0.3, default: 0.1, step: 0.01 },
+      { id: 'glow', label: 'Glow', min: 0.5, max: 3, default: 1.5, step: 0.1 },
+      { id: 'seed', label: 'Seed', min: 0, max: 9999, default: 42, step: 1 },
+    ],
+    compute: (w, h, p) => {
+      const n = new NoiseGenerator(p.seed ?? 42);
+      const freq = p.frequency ?? 3, crack = p.crackWidth ?? 0.1, glow = p.glow ?? 1.5;
+      return genRGB(w, h, (nx, ny) => {
+        const v = n.voronoi(nx * freq * 3, ny * freq * 3, 1);
+        const edge = v.f2 - v.f1;
+        const crackVal = smoothstep(crack, 0, edge);
+        const noise = n.fbm(nx * freq * 5, ny * freq * 5, 4, 2, 0.5) * 0.3 + 0.7;
+        const hot = crackVal * noise * glow;
+        const r = clamp255((0.1 + hot * 2.5) * 255);
+        const g = clamp255((0.02 + hot * 1.2 - 0.3) * 255);
+        const b = clamp255((0.01 + hot * 0.3 - 0.5) * 255);
+        return [r, g, b];
+      });
+    },
+  },
+
 };
 
 // Merge geometry & material modules

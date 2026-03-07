@@ -611,4 +611,524 @@ export const PRESETS: Preset[] = [
       makeEdge('pe-6', 'p-6', 'p-7', 'out', 'material'),
     ],
   },
+
+  // ══════════════════════════════════════════════════
+  //  NATURE / FX 2D PRESETS
+  // ══════════════════════════════════════════════════
+
+  {
+    id: 'ocean-surface',
+    name: '🌊 Ocean Surface',
+    category: '2d',
+    description: 'Realistic wave patterns inspired by Shadertoy seascape shaders',
+    nodes: [
+      makeNode('p-1', 'oceanWaves', 50, 100, { scale: 6, octaves: 6, choppy: 4, height: 0.7, time: 1, dragMult: 0.38 }),
+      makeNode('p-2', 'colorMap', 300, 100, { palette: 7, contrast: 1.5 }),
+      makeNode('p-3', 'caustics', 50, 350, { scale: 8, speed: 1, intensity: 1.5, seed: 42 }),
+      makeNode('p-4', 'blend', 520, 200, { mode: 2, opacity: 0.2 }),
+      makeNode('p-5', 'bloom', 740, 200, { threshold: 0.6, intensity: 0.3, radius: 6 }),
+      makeNode('p-6', 'output', 960, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-4', 'out', 'a'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'b'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6'),
+    ],
+  },
+
+  {
+    id: 'volumetric-clouds',
+    name: '☁️ Volumetric Clouds',
+    category: '2d',
+    description: 'Soft cloud layer with density falloff and sky gradient',
+    nodes: [
+      makeNode('p-1', 'gradient', 50, 50, { angle: 90, type: 0, repeat: 1 }),
+      makeNode('p-2', 'cloudDensity', 50, 300, { frequency: 3, coverage: 0.55, density: 2.5, octaves: 6, sharpness: 0.3, seed: 42 }),
+      makeNode('p-3', 'colorMap', 300, 50, { palette: 7, contrast: 0.8 }),
+      makeNode('p-4', 'blend', 520, 150, { mode: 2, opacity: 0.8 }),
+      makeNode('p-5', 'bloom', 740, 150, { threshold: 0.5, intensity: 0.4, radius: 8 }),
+      makeNode('p-6', 'output', 960, 150),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-3'),
+      makeEdge('pe-2', 'p-3', 'p-4', 'out', 'a'),
+      makeEdge('pe-3', 'p-2', 'p-4', 'out', 'b'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6'),
+    ],
+  },
+
+  {
+    id: 'raging-fire',
+    name: '🔥 Raging Fire',
+    category: '2d',
+    description: 'Volumetric fire pattern with gyroid-inspired FBM noise',
+    nodes: [
+      makeNode('p-1', 'firePattern', 50, 180, { frequency: 5, intensity: 2.5, rise: 2, turbulence: 1, time: 0, seed: 7 }),
+      makeNode('p-2', 'bloom', 300, 180, { threshold: 0.3, intensity: 0.8, radius: 6 }),
+      makeNode('p-3', 'vignette', 520, 180, { strength: 0.9, radius: 0.5 }),
+      makeNode('p-4', 'output', 740, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+    ],
+  },
+
+  {
+    id: 'smoke-light',
+    name: '💨 Smoke & Light',
+    category: '2d',
+    description: 'Wispy smoke tendrils with volumetric light scattering',
+    nodes: [
+      makeNode('p-1', 'smokeTendrils', 50, 100, { frequency: 4, density: 2, curl: 1.5, octaves: 6, seed: 33 }),
+      makeNode('p-2', 'colorMap', 300, 100, { palette: 16, contrast: 1.5 }),
+      makeNode('p-3', 'lensFlare', 50, 350, { sunX: 0.2, sunY: 0.15, intensity: 1.5, rings: 0.3, ghosts: 4 }),
+      makeNode('p-4', 'blend', 520, 200, { mode: 2, opacity: 0.6 }),
+      makeNode('p-5', 'output', 740, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-4', 'out', 'a'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'b'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+    ],
+  },
+
+  {
+    id: 'aurora-borealis',
+    name: '🌌 Aurora Borealis',
+    category: '2d',
+    description: 'Northern lights with ethereal color bands',
+    nodes: [
+      makeNode('p-1', 'aurora', 50, 180, { frequency: 5, bands: 4, waviness: 2, brightness: 2, seed: 42 }),
+      makeNode('p-2', 'bloom', 300, 180, { threshold: 0.2, intensity: 0.6, radius: 10 }),
+      makeNode('p-3', 'filmGrain', 520, 180, { intensity: 0.04, seed: 3 }),
+      makeNode('p-4', 'output', 740, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+    ],
+  },
+
+  {
+    id: 'lightning-storm',
+    name: '⚡ Lightning Storm',
+    category: '2d',
+    description: 'Procedural lightning bolts against a dark sky',
+    nodes: [
+      makeNode('p-1', 'lightning', 50, 100, { branches: 4, detail: 8, glow: 2.5, seed: 42 }),
+      makeNode('p-2', 'cloudDensity', 50, 350, { frequency: 2, coverage: 0.6, density: 1.5, octaves: 5, sharpness: 0.2, seed: 99 }),
+      makeNode('p-3', 'colorMap', 300, 350, { palette: 13, contrast: 0.5 }),
+      makeNode('p-4', 'blend', 520, 200, { mode: 2, opacity: 0.4 }),
+      makeNode('p-5', 'bloom', 740, 200, { threshold: 0.3, intensity: 0.5, radius: 8 }),
+      makeNode('p-6', 'output', 960, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-4', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'b'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6'),
+    ],
+  },
+
+  {
+    id: 'deep-nebula',
+    name: '✨ Deep Nebula',
+    category: '2d',
+    description: 'Cosmic gas clouds with starfield overlay',
+    nodes: [
+      makeNode('p-1', 'nebula', 50, 180, { frequency: 3, colorShift: 0.7, density: 2.5, stars: 0.6, seed: 42 }),
+      makeNode('p-2', 'bloom', 300, 180, { threshold: 0.3, intensity: 0.5, radius: 6 }),
+      makeNode('p-3', 'vignette', 520, 180, { strength: 0.5, radius: 0.8 }),
+      makeNode('p-4', 'output', 740, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+    ],
+  },
+
+  {
+    id: 'galaxy-spiral',
+    name: '🌀 Galaxy Spiral',
+    category: '2d',
+    description: 'Spiral galaxy with arms, core glow and stars',
+    nodes: [
+      makeNode('p-1', 'galaxySpiral', 50, 180, { arms: 2, tightness: 4, falloff: 2, brightness: 2.5, seed: 42 }),
+      makeNode('p-2', 'bloom', 300, 180, { threshold: 0.2, intensity: 0.6, radius: 8 }),
+      makeNode('p-3', 'output', 520, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+    ],
+  },
+
+  {
+    id: 'lava-lake',
+    name: '🌋 Lava Lake',
+    category: '2d',
+    description: 'Molten lava with glowing cracks between cooling plates',
+    nodes: [
+      makeNode('p-1', 'lavaLake', 50, 180, { frequency: 3, crackWidth: 0.12, glow: 1.8, seed: 42 }),
+      makeNode('p-2', 'bloom', 300, 180, { threshold: 0.3, intensity: 0.7, radius: 6 }),
+      makeNode('p-3', 'filmGrain', 520, 180, { intensity: 0.05, seed: 7 }),
+      makeNode('p-4', 'output', 740, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+    ],
+  },
+
+  {
+    id: 'ice-frost',
+    name: '❄️ Ice Frost',
+    category: '2d',
+    description: 'Crystalline ice patterns with cold palette',
+    nodes: [
+      makeNode('p-1', 'icePattern', 50, 180, { scale: 8, branches: 6, detail: 5, seed: 42 }),
+      makeNode('p-2', 'colorMap', 300, 180, { palette: 15, contrast: 1.5 }),
+      makeNode('p-3', 'bloom', 520, 180, { threshold: 0.4, intensity: 0.4, radius: 4 }),
+      makeNode('p-4', 'output', 740, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+    ],
+  },
+
+  {
+    id: 'ripple-pond',
+    name: '💧 Ripple Pond',
+    category: '2d',
+    description: 'Multi-source water ripples with interference',
+    nodes: [
+      makeNode('p-1', 'rippleWaves', 50, 180, { frequency: 20, decay: 3, cx: 0.3, cy: 0.4, sources: 3, seed: 42 }),
+      makeNode('p-2', 'colorMap', 300, 180, { palette: 7, contrast: 1.2 }),
+      makeNode('p-3', 'bloom', 520, 180, { threshold: 0.5, intensity: 0.3, radius: 4 }),
+      makeNode('p-4', 'output', 740, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+    ],
+  },
+
+  {
+    id: 'underwater-world',
+    name: '🐠 Underwater World',
+    category: '2d',
+    description: 'Deep ocean with caustics, particles and teal palette',
+    nodes: [
+      makeNode('p-1', 'caustics', 50, 80, { scale: 5, speed: 0.8, intensity: 2, seed: 42 }),
+      makeNode('p-2', 'smokeTendrils', 50, 320, { frequency: 2, density: 1.5, curl: 2, octaves: 5, seed: 77 }),
+      makeNode('p-3', 'blend', 300, 180, { mode: 2, opacity: 0.4 }),
+      makeNode('p-4', 'colorMap', 520, 180, { palette: 15, contrast: 1.3 }),
+      makeNode('p-5', 'vignette', 740, 180, { strength: 0.6, radius: 0.7 }),
+      makeNode('p-6', 'output', 960, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-3', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3', 'out', 'b'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6'),
+    ],
+  },
+
+  {
+    id: 'sun-flare',
+    name: '☀️ Sun & Flare',
+    category: '2d',
+    description: 'Dramatic sun with lens flare ghosts and rings',
+    nodes: [
+      makeNode('p-1', 'lensFlare', 50, 180, { sunX: 0, sunY: 0, intensity: 3, rings: 0.7, ghosts: 8 }),
+      makeNode('p-2', 'bloom', 300, 180, { threshold: 0.2, intensity: 0.8, radius: 12 }),
+      makeNode('p-3', 'output', 520, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+    ],
+  },
+
+  {
+    id: 'alien-skin',
+    name: '👽 Alien Skin',
+    category: '2d',
+    description: 'Organic alien texture with reaction-diffusion and voronoi',
+    nodes: [
+      makeNode('p-1', 'reactionDiffusion', 50, 100, { feed: 0.04, kill: 0.065, iterations: 2500 }),
+      makeNode('p-2', 'voronoi', 50, 350, { scale: 12, jitter: 0.9, mode: 1, seed: 33 }),
+      makeNode('p-3', 'blend', 300, 200, { mode: 1, opacity: 0.4 }),
+      makeNode('p-4', 'colorMap', 520, 200, { palette: 11, contrast: 1.5 }),
+      makeNode('p-5', 'normalMap', 740, 200, { strength: 3 }),
+      makeNode('p-6', 'output', 960, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-3', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3', 'out', 'b'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6'),
+    ],
+  },
+
+  {
+    id: 'cyberpunk-city',
+    name: '🏙️ Cyberpunk Grid',
+    category: '2d',
+    description: 'Neon grid cityscape with lens flare and scanlines',
+    nodes: [
+      makeNode('p-1', 'hexGrid', 50, 80, { scale: 12, lineWidth: 0.06 }),
+      makeNode('p-2', 'gradient', 50, 320, { angle: 90, type: 0, repeat: 1 }),
+      makeNode('p-3', 'blend', 300, 180, { mode: 1, opacity: 0.7 }),
+      makeNode('p-4', 'colorMap', 520, 120, { palette: 12, contrast: 1.5 }),
+      makeNode('p-5', 'scanlines', 520, 320, { spacing: 2, intensity: 0.15 }),
+      makeNode('p-6', 'bloom', 740, 200, { threshold: 0.4, intensity: 0.5, radius: 4 }),
+      makeNode('p-7', 'output', 960, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-3', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3', 'out', 'b'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6'),
+      makeEdge('pe-6', 'p-6', 'p-7'),
+    ],
+  },
+
+  // ══════════════════════════════════════════════════
+  //  ADVANCED 3D PRESETS
+  // ══════════════════════════════════════════════════
+
+  {
+    id: '3d-coral-reef',
+    name: '🪸 Coral Reef',
+    category: '3d',
+    description: 'Organic branching coral with noise displacement',
+    nodes: [
+      makeNode('p-1', 'sdfSphere', 50, 100, { radius: 0.5, cx: 0, cy: -0.2, cz: 0 }),
+      makeNode('p-2', 'sdfCylinder', 50, 300, { radius: 0.15, height: 0.6 }),
+      makeNode('p-3', 'sdfSmoothUnion', 280, 180, { smoothness: 0.4 }),
+      makeNode('p-4', 'sdfDisplace', 500, 180, { strength: 0.15, frequency: 8 }),
+      makeNode('p-5', 'sdfRepeatLimited', 720, 180, { period: 1.2, countX: 1, countY: 0, countZ: 1 }),
+      makeNode('p-6', 'extractMesh', 940, 80, { resolution: 40 }),
+      makeNode('p-7', 'pbrMaterial', 940, 320, { r: 255, g: 120, b: 80, roughness: 0.6, metalness: 0 }),
+      makeNode('p-8', 'output3D', 1160, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-3', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3', 'out', 'b'),
+      makeEdge('pe-3', 'p-3', 'p-4'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6', 'out', 'sdf'),
+      makeEdge('pe-6', 'p-6', 'p-8', 'out', 'mesh'),
+      makeEdge('pe-7', 'p-7', 'p-8', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-volcanic-rock',
+    name: '🌋 Volcanic Rock',
+    category: '3d',
+    description: 'Rough volcanic rock with displacement and dark material',
+    nodes: [
+      makeNode('p-1', 'sdfSphere', 50, 200, { radius: 0.9 }),
+      makeNode('p-2', 'sdfDisplace', 280, 200, { strength: 0.25, frequency: 6 }),
+      makeNode('p-3', 'extractMesh', 500, 100, { resolution: 44 }),
+      makeNode('p-4', 'pbrMaterial', 500, 350, { r: 50, g: 40, b: 35, roughness: 0.95, metalness: 0 }),
+      makeNode('p-5', 'output3D', 720, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3', 'out', 'sdf'),
+      makeEdge('pe-3', 'p-3', 'p-5', 'out', 'mesh'),
+      makeEdge('pe-4', 'p-4', 'p-5', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-ice-crystal',
+    name: '🧊 Ice Crystal',
+    category: '3d',
+    description: 'Elongated octahedron with glass material — frozen shard',
+    nodes: [
+      makeNode('p-1', 'sdfOctahedron', 50, 200, { size: 0.6 }),
+      makeNode('p-2', 'sdfElongate', 280, 200, { ex: 0, ey: 0.8, ez: 0 }),
+      makeNode('p-3', 'sdfRotate', 500, 200, { rx: 15, ry: 0, rz: 30 }),
+      makeNode('p-4', 'extractMesh', 720, 100, { resolution: 36 }),
+      makeNode('p-5', 'glassMaterial', 720, 350, { r: 180, g: 230, b: 255, roughness: 0.02 }),
+      makeNode('p-6', 'output3D', 940, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'sdf'),
+      makeEdge('pe-4', 'p-4', 'p-6', 'out', 'mesh'),
+      makeEdge('pe-5', 'p-5', 'p-6', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-abstract-arch',
+    name: '🏗️ Abstract Architecture',
+    category: '3d',
+    description: 'Intersecting cylinders and boxes — architectural abstraction',
+    nodes: [
+      makeNode('p-1', 'sdfCylinder', 50, 80, { radius: 0.3, height: 1.5 }),
+      makeNode('p-2', 'sdfBox', 50, 280, { width: 1.2, height: 0.15, depth: 1.2, round: 0.03 }),
+      makeNode('p-3', 'sdfSmoothUnion', 300, 160, { smoothness: 0.08 }),
+      makeNode('p-4', 'sdfCylinder', 50, 480, { radius: 0.25, height: 1.2 }),
+      makeNode('p-5', 'sdfRotate', 300, 480, { rx: 90, ry: 0, rz: 0 }),
+      makeNode('p-6', 'sdfSmoothSubtract', 520, 300, { smoothness: 0.05 }),
+      makeNode('p-7', 'extractMesh', 740, 200, { resolution: 44 }),
+      makeNode('p-8', 'metalMaterial', 740, 450, { r: 230, g: 220, b: 200, roughness: 0.15 }),
+      makeNode('p-9', 'output3D', 960, 300),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-3', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3', 'out', 'b'),
+      makeEdge('pe-3', 'p-3', 'p-6', 'out', 'a'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6', 'out', 'b'),
+      makeEdge('pe-6', 'p-6', 'p-7', 'out', 'sdf'),
+      makeEdge('pe-7', 'p-7', 'p-9', 'out', 'mesh'),
+      makeEdge('pe-8', 'p-8', 'p-9', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-ocean-terrain',
+    name: '🌊 Ocean Terrain',
+    category: '3d',
+    description: 'Wave-based heightmap converted to 3D terrain mesh',
+    nodes: [
+      makeNode('p-1', 'oceanWaves', 50, 100, { scale: 4, octaves: 5, choppy: 3, height: 0.8, time: 1, dragMult: 0.35 }),
+      makeNode('p-2', 'heightToMesh', 300, 100, { heightScale: 0.4, resolution: 80 }),
+      makeNode('p-3', 'pbrMaterial', 300, 350, { r: 30, g: 100, b: 180, roughness: 0.15, metalness: 0.1 }),
+      makeNode('p-4', 'output3D', 520, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-4', 'out', 'mesh'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-melting-sphere',
+    name: '🫠 Melting Sphere',
+    category: '3d',
+    description: 'Sphere with heavy noise displacement — looks melted',
+    nodes: [
+      makeNode('p-1', 'sdfSphere', 50, 200, { radius: 0.8 }),
+      makeNode('p-2', 'sdfDisplace', 280, 200, { strength: 0.35, frequency: 4 }),
+      makeNode('p-3', 'sdfBend', 500, 200, { bend: 0.8 }),
+      makeNode('p-4', 'extractMesh', 720, 100, { resolution: 40 }),
+      makeNode('p-5', 'emissiveMaterial', 720, 350, { r: 255, g: 50, b: 20, intensity: 1.5 }),
+      makeNode('p-6', 'output3D', 940, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'sdf'),
+      makeEdge('pe-4', 'p-4', 'p-6', 'out', 'mesh'),
+      makeEdge('pe-5', 'p-5', 'p-6', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-floating-islands',
+    name: '🏝️ Floating Islands',
+    category: '3d',
+    description: 'Eroded terrain with noise — floating landmass',
+    nodes: [
+      makeNode('p-1', 'ridged', 50, 100, { frequency: 3, octaves: 6, lacunarity: 2.2, persistence: 0.55, seed: 42 }),
+      makeNode('p-2', 'erosion', 300, 100, { drops: 4000, erosionRate: 0.12, deposition: 0.06, seed: 42 }),
+      makeNode('p-3', 'heightToMesh', 520, 100, { heightScale: 0.8, resolution: 80 }),
+      makeNode('p-4', 'pbrMaterial', 520, 350, { r: 100, g: 140, b: 70, roughness: 0.85, metalness: 0 }),
+      makeNode('p-5', 'output3D', 740, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-5', 'out', 'mesh'),
+      makeEdge('pe-4', 'p-4', 'p-5', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-totem',
+    name: '🗿 Ancient Totem',
+    category: '3d',
+    description: 'Stacked round cones with displacement — alien artifact',
+    nodes: [
+      makeNode('p-1', 'sdfRoundCone', 50, 100, { r1: 0.5, r2: 0.3, height: 0.4 }),
+      makeNode('p-2', 'sdfRoundCone', 50, 300, { r1: 0.3, r2: 0.15, height: 0.5 }),
+      makeNode('p-3', 'sdfTranslate', 280, 300, { tx: 0, ty: 0.5, tz: 0 }),
+      makeNode('p-4', 'sdfSmoothUnion', 500, 180, { smoothness: 0.15 }),
+      makeNode('p-5', 'sdfDisplace', 720, 180, { strength: 0.06, frequency: 10 }),
+      makeNode('p-6', 'extractMesh', 940, 80, { resolution: 40 }),
+      makeNode('p-7', 'pbrMaterial', 940, 320, { r: 140, g: 120, b: 90, roughness: 0.9, metalness: 0 }),
+      makeNode('p-8', 'output3D', 1160, 180),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-4', 'out', 'a'),
+      makeEdge('pe-2', 'p-2', 'p-3'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'b'),
+      makeEdge('pe-4', 'p-4', 'p-5'),
+      makeEdge('pe-5', 'p-5', 'p-6', 'out', 'sdf'),
+      makeEdge('pe-6', 'p-6', 'p-8', 'out', 'mesh'),
+      makeEdge('pe-7', 'p-7', 'p-8', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-neon-knot',
+    name: '💜 Neon Knot',
+    category: '3d',
+    description: 'Torus knot with emissive glow material',
+    nodes: [
+      makeNode('p-1', 'sdfTorusKnot', 50, 200, { major: 0.5, minor: 0.12, p: 3, q: 5 }),
+      makeNode('p-2', 'extractMesh', 300, 100, { resolution: 48 }),
+      makeNode('p-3', 'emissiveMaterial', 300, 350, { r: 180, g: 0, b: 255, intensity: 2 }),
+      makeNode('p-4', 'output3D', 520, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2', 'out', 'sdf'),
+      makeEdge('pe-2', 'p-2', 'p-4', 'out', 'mesh'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'material'),
+    ],
+  },
+
+  {
+    id: '3d-chain-link',
+    name: '⛓️ Chain Link',
+    category: '3d',
+    description: 'Single chain link with metallic finish',
+    nodes: [
+      makeNode('p-1', 'sdfLink', 50, 200, { length: 0.4, r1: 0.5, r2: 0.12 }),
+      makeNode('p-2', 'extractMesh', 280, 100, { resolution: 44 }),
+      makeNode('p-3', 'metalMaterial', 280, 350, { r: 200, g: 180, b: 140, roughness: 0.2 }),
+      makeNode('p-4', 'output3D', 500, 200),
+    ],
+    edges: [
+      makeEdge('pe-1', 'p-1', 'p-2', 'out', 'sdf'),
+      makeEdge('pe-2', 'p-2', 'p-4', 'out', 'mesh'),
+      makeEdge('pe-3', 'p-3', 'p-4', 'out', 'material'),
+    ],
+  },
 ];
