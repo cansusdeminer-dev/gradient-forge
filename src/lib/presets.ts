@@ -814,7 +814,7 @@ export const PRESETS: Preset[] = [
     category: '2d',
     description: 'Multi-source water ripples with interference',
     nodes: [
-      makeNode('p-1', 'ripple', 50, 180, { frequency: 20, decay: 3, cx: 0.3, cy: 0.4, sources: 3, seed: 42 }),
+      makeNode('p-1', 'rippleWaves', 50, 180, { frequency: 20, decay: 3, cx: 0.3, cy: 0.4, sources: 3, seed: 42 }),
       makeNode('p-2', 'colorMap', 300, 180, { palette: 7, contrast: 1.2 }),
       makeNode('p-3', 'bloom', 520, 180, { threshold: 0.5, intensity: 0.3, radius: 4 }),
       makeNode('p-4', 'output', 740, 180),
