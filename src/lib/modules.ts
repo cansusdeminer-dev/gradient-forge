@@ -2214,7 +2214,7 @@ export const MODULES: Record<string, ModuleDef> = {
           const gd = Math.sqrt(gx * gx + gy * gy);
           brightness += Math.max(0.04 / Math.pow(gd * 10 + 0.1, 1), 0) / 20;
         }
-        const t = (i => i + 1)(0); // color variation
+        // color warmth
         const r = brightness * 255 * 1.2;
         const g = brightness * 255 * 0.9;
         const b = brightness * 255 * 0.6;
@@ -2223,8 +2223,8 @@ export const MODULES: Record<string, ModuleDef> = {
     },
   },
 
-  ripple: {
-    id: 'ripple', name: 'Ripple', category: 'generator', icon: '◎', color: 'hsl(180 100% 50%)',
+  rippleWaves: {
+    id: 'rippleWaves', name: 'Ripple Waves', category: 'generator', icon: '◎', color: 'hsl(180 100% 50%)',
     inputs: [], outputs: ['out'],
     params: [
       { id: 'frequency', label: 'Freq', min: 1, max: 50, default: 15, step: 0.5 },
