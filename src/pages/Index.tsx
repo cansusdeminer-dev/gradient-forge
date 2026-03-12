@@ -279,8 +279,11 @@ function SynthApp() {
             </div>
           </div>
 
-          {/* Preview */}
-          <div className="w-[320px] shrink-0 flex flex-col">
+          {/* Preview - resizable */}
+          <div className="w-[480px] min-w-[280px] max-w-[800px] shrink-0 flex flex-col relative group"
+            style={{ resize: 'horizontal', overflow: 'hidden', direction: 'rtl' }}
+          >
+            <div style={{ direction: 'ltr', display: 'flex', flexDirection: 'column', height: '100%' }}>
             {output && (output.type === 'scene3d' || output.type === 'mesh' || output.type === 'sdf3d') ? (
               <div className="flex-1">
                 <Viewport3D resource={output} />
