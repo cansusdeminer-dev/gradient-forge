@@ -295,6 +295,7 @@ function SynthApp() {
                 onResolutionChange={setResolution}
               />
             )}
+            </div>
           </div>
         </div>
 
