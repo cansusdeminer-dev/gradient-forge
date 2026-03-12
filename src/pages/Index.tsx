@@ -54,7 +54,7 @@ const defaultPreset = PRESETS[0];
 function SynthApp() {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultPreset.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultPreset.edges);
-  const [resolution, setResolution] = useState(256);
+  const [resolution, setResolution] = useState(512);
   const [output, setOutput] = useState<Resource | null>(null);
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -279,8 +279,11 @@ function SynthApp() {
             </div>
           </div>
 
-          {/* Preview */}
-          <div className="w-[320px] shrink-0 flex flex-col">
+          {/* Preview - resizable */}
+          <div className="w-[480px] min-w-[280px] max-w-[800px] shrink-0 flex flex-col relative group"
+            style={{ resize: 'horizontal', overflow: 'hidden', direction: 'rtl' }}
+          >
+            <div style={{ direction: 'ltr', display: 'flex', flexDirection: 'column', height: '100%' }}>
             {output && (output.type === 'scene3d' || output.type === 'mesh' || output.type === 'sdf3d') ? (
               <div className="flex-1">
                 <Viewport3D resource={output} />
@@ -292,6 +295,7 @@ function SynthApp() {
                 onResolutionChange={setResolution}
               />
             )}
+            </div>
           </div>
         </div>
 

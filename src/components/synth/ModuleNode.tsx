@@ -2,7 +2,7 @@ import React, { useCallback, useContext } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import { MODULES } from '@/lib/modules';
 import { NodePreviewContext } from '@/lib/synthContext';
-import Knob from './Knob';
+import { Slider } from '@/components/ui/slider';
 
 interface ModuleNodeData {
   moduleType: string;
@@ -56,7 +56,7 @@ const ModuleNode: React.FC<NodeProps> = ({ id, data, selected }) => {
       className={`rounded-lg border overflow-hidden transition-shadow duration-200 ${selected ? 'border-primary/60' : 'border-border/40'}`}
       style={{
         background: 'hsl(240 20% 11%)',
-        minWidth: moduleDef.params.length > 4 ? 200 : 160,
+        width: 200,
         boxShadow: selected
           ? `0 0 16px ${catColor}30, 0 0 4px ${catColor}20`
           : '0 2px 8px hsl(0 0% 0% / 0.3)',
@@ -96,21 +96,29 @@ const ModuleNode: React.FC<NodeProps> = ({ id, data, selected }) => {
         </div>
       )}
 
-      {/* Params */}
+      {/* Params as sliders */}
       {moduleDef.params.length > 0 && (
-        <div className="px-1.5 py-2 flex flex-wrap justify-center gap-0.5">
-          {moduleDef.params.map(param => (
-            <Knob
-              key={param.id}
-              value={params[param.id] ?? param.default}
-              min={param.min}
-              max={param.max}
-              step={param.step}
-              label={param.label}
-              onChange={(v) => handleParamChange(param.id, v)}
-              color={catColor}
-            />
-          ))}
+        <div className="px-3 py-2 flex flex-col gap-1.5">
+          {moduleDef.params.map(param => {
+            const val = params[param.id] ?? param.default;
+            const displayValue = (param.step ?? 0.01) >= 1 ? val.toFixed(0) : val.toFixed(2);
+            return (
+              <div key={param.id} className="flex flex-col gap-0.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[8px] text-muted-foreground truncate">{param.label}</span>
+                  <span className="text-[7px] text-muted-foreground/50 font-mono">{displayValue}</span>
+                </div>
+                <Slider
+                  value={[val]}
+                  min={param.min}
+                  max={param.max}
+                  step={param.step ?? 0.01}
+                  onValueChange={([v]) => handleParamChange(param.id, v)}
+                  className="w-full h-3 nodrag"
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 
