@@ -54,7 +54,7 @@ const defaultPreset = PRESETS[0];
 function SynthApp() {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultPreset.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultPreset.edges);
-  const [resolution, setResolution] = useState(256);
+  const [resolution, setResolution] = useState(512);
   const [output, setOutput] = useState<Resource | null>(null);
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
   const [addDialogOpen, setAddDialogOpen] = useState(false);
